@@ -1,9 +1,8 @@
-//Sistema ventas
-
+//Sistema de ventas
 class Producto {
     static contadorProductos = 0;
 
-    constructor(nombre, precio, categoria, stock){
+    constructor(nombre, precio, categoria, stock) {
         this._idProducto = ++Producto.contadorProductos;
         this._nombre = nombre;
         this._precio = precio;
@@ -11,85 +10,99 @@ class Producto {
         this.stock = stock;
     }
 
-    get idProducto(){
+    get idProducto() {
         return this._idProducto;
     }
 
-    get nombre(){
-        return this.nombre;
+    get nombre() {
+        return this._nombre;
     }
 
-    set nombre(nombre){
+    set nombre(nombre) {
         this._nombre = nombre;
     }
 
-    get precio(){
+    get precio() {
         return this._precio;
     }
 
-    set precio(precio){
-        //Validar que el precio no sea negativo
-        if (precio < 0){
-            console.error('El precio no puede ser negativo')
-        }else{
+    set precio(precio) {
+        if (precio < 0) {
+            console.error('El precio no puede ser negativo.');
+        } else {
             this._precio = precio;
         }
     }
 
-    get categoria(){
-        return this.categoria;
+    get categoria() {
+        return this._categoria;
     }
 
-    set categoria(categoria){
+    set categoria(categoria) {
         this._categoria = categoria;
     }
 
-    toString(){
-        return `idProducto: ${this._idProducto}, nombre: ${this._nombre}, precio: ${this._precio}`;
+    get stock() {
+        return this._stock;
+    }
+
+    set stock(stock) {
+        if (stock < 0) {
+            console.error('El stock no puede ser negativo.');
+        } else {
+            this._stock = stock;
+        }
+    }
+
+    toString() {
+        return `idProducto: ${this._idProducto}, nombre: ${this._nombre}, precio: ${this._precio}, categoria: ${this._categoria}, stock: ${this._stock}`;
     }
 }
 
 class Orden {
     static contadorOrdenes = 0;
 
-    static get MAX_PRODUCTOS(){
+    static get MAX_PRODUCTOS() {
         return 5;
     }
 
-    constructor(){
+    constructor() {
         this._idOrden = ++Orden.contadorOrdenes;
         this._productos = [];
-        this._contadorProductosAgregados = 0;
     }
 
-    get idOrden(){
+    get idOrden() {
         return this._idOrden;
     }
 
-    agregarProducto(producto){
-        //Verificar si no hemos superado el máximo de productos existentes
-        if (this._productos.length < Orden.MAX_PRODUCTOS){
-            this._productos.push(producto);
-            //Otra sintaxis
-            //this._productos[this._contadorProductosAgregados++] = producto;
-        }else {
-            console.log('No se pueden agregar más productos a la orden');
+    agregarProducto(producto) {
+        if (producto.stock > 0) {
+            if (this._productos.length < Orden.MAX_PRODUCTOS) {
+                this._productos.push(producto);
+                producto.stock -= 1;
+            } else {
+                console.log('No se pueden agregar más productos a la orden');
+            }
+        } else {
+            console.log(`El producto ${producto.nombre} no tiene stock disponible.`);
         }
     }
 
-    calcularTotal(){
+    calcularTotal() {
         let totalVenta = 0;
-
-        for(const producto of this._productos){
-            totalVenta += producto._precio; //totalVenta = totalVenta + producto._precio
+        for (const producto of this._productos) {
+            let precioFinal = producto.precio;
+            if (producto.categoria === 'Electrónica') {
+                precioFinal *= 0.9;
+            }
+            totalVenta += precioFinal;
         }
-
         return totalVenta;
     }
 
     calcularImpuestos() {
         const total = this.calcularTotal();
-        const impuesto = total * 0.15;
+        const impuesto = total * 0.16;
         return total + impuesto;
     }
 
@@ -102,23 +115,21 @@ class Orden {
         return this._productos.map(producto => producto.toString()).join('\n');
     }
 
-    mostrarOrden(){
+    mostrarOrden() {
         let productosOrden = '';
-
-        for(const producto of this._productos){
+        for (const producto of this._productos) {
             productosOrden += '\n{' + producto.toString() + '}';
         }
-
-        console.log(`Orden: ${this._idOrden} Total: $${this.calcularTotal()}, Productos: ${productosOrden}`);
+        console.log(`Orden: ${this._idOrden} Total: $${this.calcularTotal()}, Total con impuestos: $${this.calcularImpuestos()}, Productos: ${productosOrden}`);
     }
 }
 
-//Probando
-let producto1 = new Producto('Laptop', 989, 'Electrónica');
-let producto2 = new Producto('Silla', 30, 'Hogar');
-let producto3 = new Producto('Teclado', 150, 'Oficina');
-let producto4 = new Producto('Platos', 10, 'Hogar');
-let producto5 = new Producto('Borrador', 150, 'Escolar');
+//Main
+let producto1 = new Producto('Laptop', 989, 'Electrónica', 2);
+let producto2 = new Producto('Silla', 30, 'Hogar', 3);
+let producto3 = new Producto('Teclado', 150, 'Oficina', 50);
+let producto4 = new Producto('Platos', 10, 'Hogar', 5);
+let producto5 = new Producto('Borrador', 150, 'Escolar', 20);
 
 let orden1 = new Orden();
 orden1.agregarProducto(producto1);
